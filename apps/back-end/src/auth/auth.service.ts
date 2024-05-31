@@ -13,11 +13,9 @@ export class AuthService {
   ) {
     this.usersService = usersService;
     this.jwtService = jwtService;
-    console.log({ usersService });
   }
 
   async signUp(email: string, password: string): Promise<any> {
-    console.log('chamou', { email, password });
     if (!email || !password) {
       throw new HttpException(
         'Please enter a correct email or password!',
