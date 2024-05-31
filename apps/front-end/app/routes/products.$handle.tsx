@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import {Suspense, useEffect, useState} from 'react';
 import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {
   Await,
@@ -25,6 +25,7 @@ import type {
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
 import {getVariantUrl} from '~/lib/variants';
+import {ProductService} from '~/services/product.service';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -215,6 +216,27 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
+  console.log({product});
+  const [userSession, setUserSession] = useState();
+
+  function getUserSession() {
+    const response = localStorage.getItem('userSession');
+    if (response) {
+      const parsedResponse = JSON.parse(response);
+
+      setUserSession(parsedResponse);
+    }
+  }
+
+  async function handleAddToFavorites() {
+    if (!userSession) return null;
+    await ProductService.addToFavorites(userSession.user._id, product.id);
+  }
+
+  useEffect(() => {
+    getUserSession();
+  }, []);
+
   return (
     <div className="product-form">
       <VariantSelector
@@ -225,6 +247,9 @@ function ProductForm({
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
+      <FavoritesButton onClick={handleAddToFavorites}>
+        Add to Favorites
+      </FavoritesButton>
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
@@ -273,6 +298,21 @@ function ProductOptions({option}: {option: VariantOption}) {
       </div>
       <br />
     </div>
+  );
+}
+function FavoritesButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button type="submit" onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
   );
 }
 

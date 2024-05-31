@@ -10,15 +10,30 @@ export class ProductsService {
     private favoriteProductModel: Model<FavoriteProduct>,
   ) {}
 
-  async addProductToFavorites(userId: Types.ObjectId, productId: string) {
-    return await this.favoriteProductModel.create({
+  async addProductToFavorites(userId: string, productId: string) {
+    await this.favoriteProductModel.create({
       userId: new Types.ObjectId(userId),
       productId,
     });
+
+    return {
+      productId,
+    };
   }
   async getUserFavoriteProducts(userId: string) {
-    return await this.favoriteProductModel.find({
+    const products = await this.favoriteProductModel.find({
       userId: new Types.ObjectId(userId),
     });
+
+    return products;
+  }
+
+  async deleteFavorite(id: string) {
+    await this.favoriteProductModel.deleteOne({
+      _id: new Types.ObjectId(id),
+    });
+    return {
+      message: 'Deleted Favorite Succesfully!',
+    };
   }
 }

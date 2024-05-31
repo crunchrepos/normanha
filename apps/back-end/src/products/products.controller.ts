@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -23,8 +24,14 @@ export class ProductsController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('favorites/:id')
+  @Get('favorites/user/:id')
   getUserFavorites(@Param() id: string) {
     return this.productsService.getUserFavoriteProducts(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete('favorites/:id')
+  deleteUserFavorite(@Param() id: string) {
+    return this.productsService.deleteFavorite(id);
   }
 }
