@@ -4,7 +4,7 @@ export interface User {
 }
 
 export interface UserSession {
-  access_code: string;
+  access_token: string;
   user: User;
 }
 

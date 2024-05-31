@@ -1,5 +1,6 @@
 import {MetaFunction} from '@shopify/remix-oxygen';
 import {useState} from 'react';
+import {restApi} from '~/services/api';
 import {AuthService} from '~/services/auth.service';
 
 export const meta: MetaFunction = () => {
@@ -21,6 +22,8 @@ export default function SignUp() {
           access_token: response.data.access_token,
           user: response.data.user,
         };
+
+        console.log({restApi: restApi.defaults.headers});
         localStorage.set('userSession', JSON.stringify(session));
         window.location.href = '/';
       }
