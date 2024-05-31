@@ -1,5 +1,8 @@
 ## Crunch FullStack Assignment
 
+### Demo Videos
+https://github.com/lnormanha/crunch-fullstack-assignment/assets/31674320/d23f1a48-fac2-451d-b9c3-be26f128a0e4
+
 ### Design choices and technologies used
 
 For this assignment I chose the following stack:
@@ -32,3 +35,7 @@ It will start both the Front-end and Back-end.
 Now you can access the project via the following URL: `http://localhost:3000`
 
 We don't need to configure ENV's, for simplicity sake and a lack of time, I choose to not include any, but I know very well that this is not recommended.
+
+### Closing thoughts
+
+Some things worked out fine and other didn't work as I planned, like the tests. I tried to focus on the core functionality of the assignment first using Authentication. 
