@@ -1,81 +1,34 @@
-# Turborepo starter
+## Crunch FullStack Assignment
 
-This is an official starter Turborepo.
+### Design choices and technologies used
 
-## Using this example
+For this assignment I chose the following stack:
 
-Run the following command:
+- Turborepo - To execute both projects at the same time with less friction.
+- MongoDB -  NoSQL Database that I usually use and have more familiarity.
+- Docker - To make the database container
+- Nest.js - To create the microsservice, mainly because of the patterns we can use, and also because it has a lot of packaged features.
+- Hydrogen with TypeScript - Mainly because it's better to have type safety and also because the back-end is also typed.
+- Rest API - I decided to create the API using Restful, I thought of using GraphQL for parity with Hydrogen, but ended up not using to avoid spending more time than necessary.
 
-```sh
-npx create-turbo@latest
-```
+For the Back-end I followed the basic Nest.js structure, creating the necessary modules, controller, and service, and using Dependency Injection when needed. I also used their testing library and passport and jwt library for the Auth flow.
 
-## What's inside?
+For the Front-end I tried to minimize big changes, so I usually ended up following the routes patterns and component structure. 
 
-This Turborepo includes the following packages/apps:
+### Running the projects 
 
-### Apps and Packages
+To run the project we need the following installed:
+- Node.js 18+
+- Docker 
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+First, we should execute our Database Container, so navigate to `apps/back-end` and run in your terminal:
+```docker-compose up```
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Now that the Database is running, open another terminal at the root of the project and run:
+```npm run dev```
 
-### Utilities
+It will start both the Front-end and Back-end.
 
-This Turborepo has some additional tools already setup for you:
+Now you can access the project via the following URL: `http://localhost:3000`
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+We don't need to configure ENV's, for simplicity sake and a lack of time, I choose to not include any, but I know very well that this is not recommended.
