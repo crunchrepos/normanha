@@ -1,0 +1,11 @@
+services:
+    mongo:
+        image: mongo:latest
+        container_name: mongodb
+        restart: always
+        environment:
+            MONGO_INITDB_DATABASE: shopify-favorites
+        ports:
+            - 27017:27017
+        volumes:
+            - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
