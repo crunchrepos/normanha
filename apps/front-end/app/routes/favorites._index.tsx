@@ -48,25 +48,29 @@ export default function Collection() {
 
   async function handleGetFavorites() {
     if (!userSession) return null;
-    const response = await ProductService.getAllUserFavorites(
-      userSession.user._id,
-    );
-    if (response.status === 200) {
-      let favoriteProductsMap: Product[] = [];
-      response.data.forEach((favorite: FavoriteProduct) => {
-        const product = products.nodes.find((product) => {
-          const splittedProductId = product.id.split('/');
+    try {
+      const response = await ProductService.getAllUserFavorites(
+        userSession.user._id,
+      );
+      if (response.status === 200) {
+        let favoriteProductsMap: Product[] = [];
+        response.data.forEach((favorite: FavoriteProduct) => {
+          const product = products.nodes.find((product) => {
+            const splittedProductId = product.id.split('/');
 
-          return (
-            splittedProductId[splittedProductId.length - 1] ===
-            favorite.productId
-          );
+            return (
+              splittedProductId[splittedProductId.length - 1] ===
+              favorite.productId
+            );
+          });
+          if (product) {
+            favoriteProductsMap.push(product as Product);
+          }
         });
-        if (product) {
-          favoriteProductsMap.push(product as Product);
-        }
-      });
-      setFavoriteProducts(favoriteProductsMap);
+        setFavoriteProducts(favoriteProductsMap);
+      }
+    } catch (error: unknown) {
+      alert('Your token has expired, please sign-in again!');
     }
   }
 

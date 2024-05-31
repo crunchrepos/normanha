@@ -4,6 +4,7 @@ import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/lib/root-data';
 import {useUserSession} from '~/hooks/useUserSession';
+import {UserSession} from '~/types/user.types';
 
 type HeaderProps = Pick<LayoutProps, 'header' | 'cart' | 'isLoggedIn'>;
 
@@ -87,11 +88,12 @@ export function HeaderMenu({
 }
 
 function HeaderCtas({cart}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+  const {userSession} = useUserSession();
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <SignInLink />
-      <FavoritesLink />
+      <SignInLink userSession={userSession} />
+      <FavoritesLink userSession={userSession} />
       <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
@@ -110,8 +112,7 @@ function SearchToggle() {
   return <a href="#search-aside">Search</a>;
 }
 
-function SignInLink() {
-  const {userSession} = useUserSession();
+function SignInLink({userSession}: {userSession?: UserSession}) {
   return (
     <a
       href={userSession ? '/' : '/sign-in'}
@@ -124,7 +125,8 @@ function SignInLink() {
   );
 }
 
-function FavoritesLink() {
+function FavoritesLink({userSession}: {userSession?: UserSession}) {
+  if (!userSession) return null;
   return <a href="/favorites">Favorites</a>;
 }
 

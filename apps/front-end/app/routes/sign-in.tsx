@@ -30,7 +30,7 @@ export default function SignIn() {
         window.location.href = '/';
       }
     } catch (error: unknown) {
-      console.log({error});
+      alert('Please, check your email and password and try again!');
     }
   }
   return (

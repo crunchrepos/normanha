@@ -28,7 +28,7 @@ export default function SignUp() {
         window.location.href = '/';
       }
     } catch (error: unknown) {
-      console.log({error});
+      alert('Please, check you email and password and try again!');
     }
   }
   return (

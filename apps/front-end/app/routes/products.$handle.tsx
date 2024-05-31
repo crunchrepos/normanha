@@ -238,10 +238,10 @@ function ProductForm({
     await ProductService.delteProductFromFavorite(favoriteData._id);
     await verifyIfHasFavorite();
   }
+
   async function verifyIfHasFavorite() {
     const splittedId = product.id.split('/');
     const id = splittedId[splittedId.length - 1];
-    console.log(id);
     const response = await ProductService.getFavoriteProduct(id);
 
     setFavoriteData(response.data);
@@ -261,11 +261,15 @@ function ProductForm({
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
-      <FavoritesButton
-        onClick={favoriteData ? handleRemoveToFavorites : handleAddToFavorites}
-      >
-        {favoriteData ? 'Remove from favorites' : 'Add to Favorites'}
-      </FavoritesButton>
+      {userSession && (
+        <FavoritesButton
+          onClick={
+            favoriteData ? handleRemoveToFavorites : handleAddToFavorites
+          }
+        >
+          {favoriteData ? 'Remove from favorites' : 'Add to Favorites'}
+        </FavoritesButton>
+      )}
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
