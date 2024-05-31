@@ -2,14 +2,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Types } from 'mongoose';
-import { FavoriteProduct } from 'src/models/products.model';
-import { FavoriteProductDocument } from 'src/schemas/favorite-product.schema';
+import { FavoriteProduct } from '../models/products.model';
+import {
+  FavoriteProductDocument,
+  FavoriteProductSchema,
+} from '../schemas/favorite-product.schema';
+import { MongooseModule } from '@nestjs/mongoose';
 
 describe('ProductsController', () => {
   let productsController: ProductsController;
   let productsService: ProductsService;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        MongooseModule.forFeature([
+          { name: 'Favorite-Products', schema: FavoriteProductSchema },
+        ]),
+      ],
+      providers: [ProductsService],
       controllers: [ProductsController],
     }).compile();
 
