@@ -3,6 +3,7 @@ import {Suspense, useState} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/lib/root-data';
+import {useUserSession} from '~/hooks/useUserSession';
 
 type HeaderProps = Pick<LayoutProps, 'header' | 'cart' | 'isLoggedIn'>;
 
@@ -110,7 +111,17 @@ function SearchToggle() {
 }
 
 function SignInLink() {
-  return <a href="/sign-in">Sign In</a>;
+  const {userSession} = useUserSession();
+  return (
+    <a
+      href={userSession ? '/' : '/sign-in'}
+      onClick={() =>
+        userSession ? localStorage.removeItem('userSession') : null
+      }
+    >
+      {userSession ? `${userSession.user.email} | Logout` : 'Sign In'}
+    </a>
+  );
 }
 
 function FavoritesLink() {

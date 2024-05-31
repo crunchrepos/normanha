@@ -28,6 +28,7 @@ import {getVariantUrl} from '~/lib/variants';
 import {ProductService} from '~/services/product.service';
 import {UserSession} from '~/types/user.types';
 import {FavoriteProduct} from '~/types/products.types';
+import {useUserSession} from '~/hooks/useUserSession';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -218,17 +219,9 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
-  const [userSession, setUserSession] = useState<UserSession>();
   const [favoriteData, setFavoriteData] = useState<FavoriteProduct>();
 
-  function getUserSession() {
-    const response = localStorage.getItem('userSession');
-    if (response) {
-      const parsedResponse = JSON.parse(response);
-
-      setUserSession(parsedResponse as unknown as UserSession);
-    }
-  }
+  const {userSession} = useUserSession();
 
   async function handleAddToFavorites() {
     if (!userSession) return null;
@@ -253,10 +246,6 @@ function ProductForm({
 
     setFavoriteData(response.data);
   }
-
-  useEffect(() => {
-    getUserSession();
-  }, []);
 
   useEffect(() => {
     verifyIfHasFavorite();

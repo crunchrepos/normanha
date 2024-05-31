@@ -3,6 +3,7 @@ import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Types } from 'mongoose';
 import { FavoriteProduct } from 'src/models/products.model';
+import { FavoriteProductDocument } from 'src/schemas/favorite-product.schema';
 
 describe('ProductsController', () => {
   let productsController: ProductsController;
@@ -43,23 +44,23 @@ describe('ProductsController', () => {
       {
         _id: new Types.ObjectId('6659659d95df5706397961fc'),
         userId: new Types.ObjectId(userId),
-        productId: 'gid://shopify/Product/7983591030806',
+        productId: '7983591030806',
       },
       {
         _id: new Types.ObjectId('665965b795df5706397961fe'),
         userId: new Types.ObjectId(userId),
-        productId: 'gid://shopify/Product/7783591030206',
+        productId: '7783591030206',
       },
       {
         _id: new Types.ObjectId('665965e895df570639796201'),
         userId: new Types.ObjectId(userId),
-        productId: 'gid://shopify/Product/7783591030206',
+        productId: '7783591030206',
       },
     ];
 
     jest
       .spyOn(productsService, 'getUserFavoriteProducts')
-      .mockImplementation(async () => result);
+      .mockImplementation(async () => result as FavoriteProductDocument[]);
 
     expect(await productsController.getUserFavorites(userId)).toBe(result);
   });
@@ -76,5 +77,19 @@ describe('ProductsController', () => {
       .mockImplementation(async () => result);
 
     expect(await productsController.deleteUserFavorite(_id)).toBe(result);
+  });
+
+  it('should fetch only 1 favorite product', async () => {
+    const _id = '665929e2f03ef2a6a9eba95b';
+    const result = {
+      _id: new Types.ObjectId('665965e895df570639796201'),
+      userId: new Types.ObjectId('665929e2f03ef2a6a9eba95b'),
+      productId: '7783591030206',
+    };
+    jest
+      .spyOn(productsService, 'getFavoriteProduct')
+      .mockImplementation(async () => result as FavoriteProductDocument);
+
+    expect(await productsController.getFavoriteProduct(_id));
   });
 });
