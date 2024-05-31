@@ -36,4 +36,9 @@ export class ProductsService {
       message: 'Deleted Favorite Succesfully!',
     };
   }
+
+  async getFavoriteProduct(productId: string) {
+    console.log({ productId });
+    return await this.favoriteProductModel.findOne({ productId });
+  }
 }

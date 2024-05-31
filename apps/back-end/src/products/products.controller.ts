@@ -34,4 +34,10 @@ export class ProductsController {
   deleteUserFavorite(@Param() id: string) {
     return this.productsService.deleteFavorite(id);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('favorites/user/product/:id')
+  getFavoriteProduct(@Param('id') id: string) {
+    return this.productsService.getFavoriteProduct(id);
+  }
 }

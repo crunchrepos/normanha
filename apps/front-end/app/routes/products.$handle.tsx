@@ -26,6 +26,8 @@ import type {
 } from '@shopify/hydrogen/storefront-api-types';
 import {getVariantUrl} from '~/lib/variants';
 import {ProductService} from '~/services/product.service';
+import {UserSession} from '~/types/user.types';
+import {FavoriteProduct} from '~/types/products.types';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -216,26 +218,49 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
-  console.log({product});
-  const [userSession, setUserSession] = useState();
+  const [userSession, setUserSession] = useState<UserSession>();
+  const [favoriteData, setFavoriteData] = useState<FavoriteProduct>();
 
   function getUserSession() {
     const response = localStorage.getItem('userSession');
     if (response) {
       const parsedResponse = JSON.parse(response);
 
-      setUserSession(parsedResponse);
+      setUserSession(parsedResponse as unknown as UserSession);
     }
   }
 
   async function handleAddToFavorites() {
     if (!userSession) return null;
-    await ProductService.addToFavorites(userSession.user._id, product.id);
+    // Get only the number from the ID
+    const splittedId = product.id.split('/');
+    await ProductService.addToFavorites(
+      userSession.user._id,
+      splittedId[splittedId.length - 1],
+    );
+    await verifyIfHasFavorite();
+  }
+  async function handleRemoveToFavorites() {
+    if (!userSession || !favoriteData) return null;
+    await ProductService.delteProductFromFavorite(favoriteData._id);
+    await verifyIfHasFavorite();
+  }
+  async function verifyIfHasFavorite() {
+    const splittedId = product.id.split('/');
+    const id = splittedId[splittedId.length - 1];
+    console.log(id);
+    const response = await ProductService.getFavoriteProduct(id);
+
+    setFavoriteData(response.data);
   }
 
   useEffect(() => {
     getUserSession();
   }, []);
+
+  useEffect(() => {
+    verifyIfHasFavorite();
+  }, [product]);
 
   return (
     <div className="product-form">
@@ -247,8 +272,10 @@ function ProductForm({
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
-      <FavoritesButton onClick={handleAddToFavorites}>
-        Add to Favorites
+      <FavoritesButton
+        onClick={favoriteData ? handleRemoveToFavorites : handleAddToFavorites}
+      >
+        {favoriteData ? 'Remove from favorites' : 'Add to Favorites'}
       </FavoritesButton>
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}

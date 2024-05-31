@@ -54,9 +54,14 @@ export default function Collection() {
     if (response.status === 200) {
       let favoriteProductsMap: Product[] = [];
       response.data.forEach((favorite: FavoriteProduct) => {
-        const product = products.nodes.find(
-          (product) => product.id === favorite.productId,
-        );
+        const product = products.nodes.find((product) => {
+          const splittedProductId = product.id.split('/');
+
+          return (
+            splittedProductId[splittedProductId.length - 1] ===
+            favorite.productId
+          );
+        });
         if (product) {
           favoriteProductsMap.push(product as Product);
         }
@@ -72,7 +77,6 @@ export default function Collection() {
   useEffect(() => {
     handleGetFavorites();
   }, [userSession]);
-  console.log(favoriteProducts);
 
   return (
     <div className="collection">

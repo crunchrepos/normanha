@@ -9,4 +9,10 @@ export class ProductService {
   static async getAllUserFavorites(userId: string) {
     return restApi.get(`${this.URL}/favorites/user/${userId}`);
   }
+  static async getFavoriteProduct(productId: string) {
+    return restApi.get(`${this.URL}/favorites/user/product/${productId}`);
+  }
+  static async delteProductFromFavorite(id: string) {
+    return restApi.delete(`${this.URL}/favorites/${id}`);
+  }
 }
