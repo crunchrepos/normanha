@@ -7,6 +7,6 @@ export class ProductService {
     return restApi.post(`${this.URL}/favorites/add`, {userId, productId});
   }
   static async getAllUserFavorites(userId: string) {
-    return restApi.get(`${this.URL}/favorites/${userId}`);
+    return restApi.get(`${this.URL}/favorites/user/${userId}`);
   }
 }

@@ -8,6 +8,12 @@ import {
 } from '@shopify/hydrogen';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
+import {useEffect, useState} from 'react';
+import {ProductService} from '~/services/product.service';
+import {FavoriteProduct} from '~/types/products.types';
+import {Product} from '@shopify/hydrogen/storefront-api-types';
+import {UserSession, UserSession} from '~/types/user.types';
+import {Jsonify} from '@remix-run/server-runtime/dist/jsonify';
 
 export const meta: MetaFunction<typeof loader> = () => {
   return [{title: `Hydrogen | Products`}];
@@ -16,7 +22,7 @@ export const meta: MetaFunction<typeof loader> = () => {
 export async function loader({request, context}: LoaderFunctionArgs) {
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
+    pageBy: 40,
   });
 
   const {products} = await storefront.query(CATALOG_QUERY, {
@@ -28,17 +34,56 @@ export async function loader({request, context}: LoaderFunctionArgs) {
 
 export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
+  const [userSession, setUserSession] = useState<UserSession>();
+  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
+
+  function getUserSession() {
+    const response = localStorage.getItem('userSession');
+    if (response) {
+      const parsedResponse = JSON.parse(response);
+
+      setUserSession(parsedResponse as unknown as UserSession);
+    }
+  }
+
+  async function handleGetFavorites() {
+    if (!userSession) return null;
+    const response = await ProductService.getAllUserFavorites(
+      userSession.user._id,
+    );
+    if (response.status === 200) {
+      let favoriteProductsMap: Product[] = [];
+      response.data.forEach((favorite: FavoriteProduct) => {
+        const product = products.nodes.find(
+          (product) => product.id === favorite.productId,
+        );
+        if (product) {
+          favoriteProductsMap.push(product as Product);
+        }
+      });
+      setFavoriteProducts(favoriteProductsMap);
+    }
+  }
+
+  useEffect(() => {
+    getUserSession();
+  }, [products]);
+
+  useEffect(() => {
+    handleGetFavorites();
+  }, [userSession]);
+  console.log(favoriteProducts);
 
   return (
     <div className="collection">
-      <h1>Products</h1>
+      <h1>Favorites</h1>
       <Pagination connection={products}>
-        {({nodes, isLoading, PreviousLink, NextLink}) => (
+        {({isLoading, PreviousLink, NextLink}) => (
           <>
             <PreviousLink>
               {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
             </PreviousLink>
-            <ProductsGrid products={nodes} />
+            <ProductsGrid products={favoriteProducts} />
             <br />
             <NextLink>
               {isLoading ? 'Loading...' : <span>Load more ↓</span>}

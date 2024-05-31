@@ -99,6 +99,8 @@ function HeaderCtas({
           </Await>
         </Suspense>
       </NavLink>
+
+      <FavoritesLink />
       <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
@@ -115,6 +117,9 @@ function HeaderMenuMobileToggle() {
 
 function SearchToggle() {
   return <a href="#search-aside">Search</a>;
+}
+function FavoritesLink() {
+  return <a href="/favorites">Favorites</a>;
 }
 
 function CartBadge({count}: {count: number}) {
