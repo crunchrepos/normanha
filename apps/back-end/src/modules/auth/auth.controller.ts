@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Post,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthPayloadDTO } from 'src/dto/auth.dto';
-import { LocalAuthGuard } from './local-auth.guard';
+import { AuthPayloadDTO } from './database/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +13,6 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  // @UseGuards(LocalAuthGuard)
   @Post('sign-in')
   signIn(@Body() signInDto: AuthPayloadDTO) {
     return this.authService.signIn(signInDto.email, signInDto.password);

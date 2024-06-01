@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { FavoriteProduct } from 'src/models/products.model';
+import { FavoriteProductModel } from './database/products.model';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel('Favorite-Products')
-    private favoriteProductModel: Model<FavoriteProduct>,
+    private favoriteProductModel: Model<FavoriteProductModel>,
   ) {}
 
   async addProductToFavorites(userId: string, productId: string) {
