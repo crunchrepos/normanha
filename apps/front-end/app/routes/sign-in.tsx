@@ -15,10 +15,29 @@ export const meta: MetaFunction = () => {
 
 export async function action({request}: ActionFunctionArgs) {
   const form = await request.formData();
-  const email = form.get('email')?.toString();
-  const password = form.get('password')?.toString();
+  const email = form.get('email')?.toString() ?? '';
+  const password = form.get('password')?.toString() ?? '';
 
-  if (!email || !password) return alert('Incorrect email or password');
+  let errors: {email?: string; password?: string} = {};
+
+  if (!email) {
+    errors = {
+      email: 'Please enter a valid email!',
+    };
+  }
+
+  if (!password) {
+    errors = {
+      ...errors,
+      password: 'Please enter a valid password!',
+    };
+  }
+
+  if (errors.email || errors.password) {
+    return json({
+      errors,
+    });
+  }
 
   const axiosInstance = createRestAPI();
   const authService = new AuthService(axiosInstance);
@@ -45,20 +64,13 @@ export async function action({request}: ActionFunctionArgs) {
       },
     });
   }
-
-  return json({
-    errors: {
-      email: 'Invalid!',
-      password: 'Invalid!',
-    },
-  });
 }
 export default function SignIn() {
   const formActionData = useActionData<typeof action>();
   return (
     <div className="auth">
       <h1>Sign In</h1>
-      <Form method="post">
+      <Form className="auth" method="post">
         <h4>Email</h4>
         <input type="text" name="email" />
         {formActionData?.errors.email ? (
