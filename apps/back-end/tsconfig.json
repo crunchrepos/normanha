@@ -16,6 +16,9 @@
       ],
       "@config/*": [
         "src/config/*"
+      ],
+      "@mocks/*": [
+        "src/mocks/*"
       ]
     },
     "incremental": true,

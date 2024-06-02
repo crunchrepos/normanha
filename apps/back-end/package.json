@@ -68,7 +68,8 @@
     "rootDir": "./",
     "moduleNameMapper": {
       "@modules/(.*)": "<rootDir>/src/modules/$1",
-      "@config/(.*)": "<rootDir>/src/config/$1"
+      "@config/(.*)": "<rootDir>/src/config/$1",
+      "@mocks/(.*)": "<rootDir>/src/mocks/$1"
     },
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
