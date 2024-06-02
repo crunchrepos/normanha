@@ -1,18 +1,27 @@
-import {restApi} from './api';
+import {AxiosInstance} from 'axios';
 
 export class ProductService {
-  static URL = 'products';
+  URL = 'products';
+  axiosInstance: AxiosInstance;
 
-  static async addToFavorites(userId: string, productId: string) {
-    return restApi.post(`${this.URL}/favorites/add`, {userId, productId});
+  constructor(axiosInstance: AxiosInstance) {
+    this.axiosInstance = axiosInstance;
   }
-  static async getAllUserFavorites(userId: string) {
-    return restApi.get(`${this.URL}/favorites/user/${userId}`);
+  async addToFavorites(userId: string, productId: string) {
+    return this.axiosInstance.post(`${this.URL}/favorites/add`, {
+      userId,
+      productId,
+    });
   }
-  static async getFavoriteProduct(productId: string) {
-    return restApi.get(`${this.URL}/favorites/user/product/${productId}`);
+  async getAllUserFavorites(userId: string) {
+    return this.axiosInstance.get(`${this.URL}/favorites/user/${userId}`);
   }
-  static async delteProductFromFavorite(id: string) {
-    return restApi.delete(`${this.URL}/favorites/${id}`);
+  async getFavoriteProduct(productId: string) {
+    return this.axiosInstance.get(
+      `${this.URL}/favorites/user/product/${productId}`,
+    );
+  }
+  async deleteProductFromFavorite(id: string) {
+    return this.axiosInstance.delete(`${this.URL}/favorites/${id}`);
   }
 }

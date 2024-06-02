@@ -1,19 +1,12 @@
-import {json, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {useLoaderData, Link, type MetaFunction} from '@remix-run/react';
-import {
-  Pagination,
-  getPaginationVariables,
-  Image,
-  Money,
-} from '@shopify/hydrogen';
+import {Image, Money} from '@shopify/hydrogen';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
-import {useEffect, useState} from 'react';
 import {ProductService} from '~/services/product.service';
 import {FavoriteProduct} from '~/types/products.types';
-import {Product} from '@shopify/hydrogen/storefront-api-types';
-import {UserSession, UserSession} from '~/types/user.types';
-import {Jsonify} from '@remix-run/server-runtime/dist/jsonify';
+import {UserSessionManager} from '~/lib/session';
+import {createRestAPI} from '~/services/api';
 
 export const meta: MetaFunction<typeof loader> = () => {
   return [{title: `Hydrogen | Products`}];
@@ -21,84 +14,77 @@ export const meta: MetaFunction<typeof loader> = () => {
 
 export async function loader({request, context}: LoaderFunctionArgs) {
   const {storefront} = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 40,
-  });
+  // Get the current user session
+  const session = await UserSessionManager.getSession(
+    request.headers.get('Cookie'),
+  );
 
-  const {products} = await storefront.query(CATALOG_QUERY, {
-    variables: {...paginationVariables},
-  });
+  // Populate the Cookie datas to a session object
+  const userSession = {
+    access_token: session.get('access_token'),
+    user: session.get('user'),
+  };
 
-  return json({products});
+  // Validate if we have the access token and the user ID to make the call to our Rest API
+  if (userSession.access_token && userSession.user?._id) {
+    // Create the API Instance with the authentication token
+    const axiosInstance = createRestAPI(userSession.access_token);
+    const productService = new ProductService(axiosInstance);
+    try {
+      const response = await productService.getAllUserFavorites(
+        userSession.user._id,
+      );
+
+      // If token has expired, redirect to home page and remove session
+      if (response.status === 401) {
+        alert('Your session has expired!');
+        const cookieData = await UserSessionManager.destroySession(session);
+        return redirect('/', {
+          headers: {
+            'Set-Cookie': cookieData,
+          },
+        });
+      }
+      // If token is valid, continue the flow
+      if (response.status === 200) {
+        // Map our favorite ID's to use in our GraphQL Query
+        const favoriteIds: string[] = response.data.map(
+          (favorite: FavoriteProduct) =>
+            `gid://shopify/Product/${favorite.productId}`,
+        );
+
+        // Early return in case the user doesn't have a product favorited
+        if (favoriteIds.length === 0) return json({products: []});
+
+        // Fetch the products with the ids as variables
+        const result = await storefront.query(
+          PRODUCT_FAVORITES_QUERY(favoriteIds),
+          {
+            variables: {ids: favoriteIds},
+          },
+        );
+
+        // Return the nodes to the main component
+        return json({products: result.nodes});
+      }
+    } catch (error: unknown) {
+      const cookieData = await UserSessionManager.destroySession(session);
+      return redirect('/', {
+        headers: {
+          'Set-Cookie': cookieData,
+        },
+      });
+    }
+  }
 }
 
 export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
-  const [userSession, setUserSession] = useState<UserSession>();
-  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
-
-  function getUserSession() {
-    const response = localStorage.getItem('userSession');
-    if (response) {
-      const parsedResponse = JSON.parse(response);
-
-      setUserSession(parsedResponse as unknown as UserSession);
-    }
-  }
-
-  async function handleGetFavorites() {
-    if (!userSession) return null;
-    try {
-      const response = await ProductService.getAllUserFavorites(
-        userSession.user._id,
-      );
-      if (response.status === 200) {
-        let favoriteProductsMap: Product[] = [];
-        response.data.forEach((favorite: FavoriteProduct) => {
-          const product = products.nodes.find((product) => {
-            const splittedProductId = product.id.split('/');
-
-            return (
-              splittedProductId[splittedProductId.length - 1] ===
-              favorite.productId
-            );
-          });
-          if (product) {
-            favoriteProductsMap.push(product as Product);
-          }
-        });
-        setFavoriteProducts(favoriteProductsMap);
-      }
-    } catch (error: unknown) {
-      alert('Your token has expired, please sign-in again!');
-    }
-  }
-
-  useEffect(() => {
-    getUserSession();
-  }, [products]);
-
-  useEffect(() => {
-    handleGetFavorites();
-  }, [userSession]);
-
+  console.log(products);
   return (
     <div className="collection">
       <h1>Favorites</h1>
-      <Pagination connection={products}>
-        {({isLoading, PreviousLink, NextLink}) => (
-          <>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-            </PreviousLink>
-            <ProductsGrid products={favoriteProducts} />
-            <br />
-            <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-            </NextLink>
-          </>
-        )}
-      </Pagination>
+      <ProductsGrid products={products} />
     </div>
   );
 }
@@ -187,27 +173,13 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 ` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2024-01/objects/product
-const CATALOG_QUERY = `#graphql
-  query Catalog(
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
-      nodes {
-        ...ProductItem
-      }
-      pageInfo {
-        hasPreviousPage
-        hasNextPage
-        startCursor
-        endCursor
+const PRODUCT_FAVORITES_QUERY = (favoriteProductsIds: string[]) => `#graphql
+  ${PRODUCT_ITEM_FRAGMENT}
+  query getFavoritedProducts($ids: [ID!]!) {
+    nodes(ids: $ids) {
+       ... on Product {
+         ...ProductItem
       }
     }
   }
-  ${PRODUCT_ITEM_FRAGMENT}
-` as const;
+`;

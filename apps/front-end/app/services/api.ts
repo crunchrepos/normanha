@@ -1,25 +1,11 @@
-import axios, {AxiosHeaders} from 'axios';
-import {UserSession} from '~/types/user.types';
+import axios from 'axios';
 
-export const restApi = axios.create({
-  baseURL: 'http://localhost:3123',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-restApi.interceptors.request.use(
-  (config) => {
-    const session = localStorage.getItem('userSession');
-    if (session) {
-      const userSession: UserSession = JSON.parse(session) as UserSession;
-      if (userSession) {
-        config.headers['Authorization'] = `Bearer ${userSession.access_token}`;
-      }
-    }
-    return config;
-  },
-  (error) => {
-    Promise.reject(error);
-  },
-);
+export const createRestAPI = (access_token?: string) =>
+  axios.create({
+    baseURL: 'http://localhost:3123',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: access_token ? `Bearer ${access_token}` : '',
+    },
+    withCredentials: true,
+  });

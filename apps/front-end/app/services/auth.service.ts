@@ -1,5 +1,4 @@
-import {AxiosResponse} from 'axios';
-import {restApi} from './api';
+import {AxiosInstance, AxiosResponse} from 'axios';
 
 interface AuthResponse {
   access_token: string;
@@ -9,19 +8,30 @@ interface AuthResponse {
   };
 }
 export class AuthService {
-  static URL = 'auth';
+  URL = 'auth';
+  axiosInstance: AxiosInstance;
 
-  static async signIn(
-    email: string,
-    password: string,
-  ): Promise<AxiosResponse<AuthResponse, unknown>> {
-    return await restApi.post(`${this.URL}/sign-in`, {email, password});
+  constructor(axiosInstance: AxiosInstance) {
+    this.axiosInstance = axiosInstance;
   }
 
-  static async signUp(
+  async signIn(
     email: string,
     password: string,
   ): Promise<AxiosResponse<AuthResponse, unknown>> {
-    return await restApi.post(`${this.URL}/sign-up`, {email, password});
+    return await this.axiosInstance.post(`${this.URL}/sign-in`, {
+      email,
+      password,
+    });
+  }
+
+  async signUp(
+    email: string,
+    password: string,
+  ): Promise<AxiosResponse<AuthResponse, unknown>> {
+    return await this.axiosInstance.post(`${this.URL}/sign-up`, {
+      email,
+      password,
+    });
   }
 }

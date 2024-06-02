@@ -1,16 +1,21 @@
-import {Await, NavLink} from '@remix-run/react';
+import {Await, NavLink, useLoaderData} from '@remix-run/react';
 import {Suspense, useState} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/lib/root-data';
 import {useUserSession} from '~/hooks/useUserSession';
 import {UserSession} from '~/types/user.types';
+import {LoaderFunctionArgs} from '@remix-run/server-runtime';
+import {UserSessionManager} from '~/lib/session';
 
-type HeaderProps = Pick<LayoutProps, 'header' | 'cart' | 'isLoggedIn'>;
+type HeaderProps = Pick<
+  LayoutProps,
+  'header' | 'cart' | 'isLoggedIn' | 'userSession'
+>;
 
 type Viewport = 'desktop' | 'mobile';
 
-export function Header({header, isLoggedIn, cart}: HeaderProps) {
+export function Header({header, isLoggedIn, cart, userSession}: HeaderProps) {
   const {shop, menu} = header;
   return (
     <header className="header">
@@ -22,7 +27,11 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
         viewport="desktop"
         primaryDomainUrl={header.shop.primaryDomain.url}
       />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+      <HeaderCtas
+        isLoggedIn={isLoggedIn}
+        cart={cart}
+        userSession={userSession}
+      />
     </header>
   );
 }
@@ -87,8 +96,10 @@ export function HeaderMenu({
   );
 }
 
-function HeaderCtas({cart}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
-  const {userSession} = useUserSession();
+function HeaderCtas({
+  cart,
+  userSession,
+}: Pick<HeaderProps, 'isLoggedIn' | 'cart'> & {userSession?: UserSession}) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
@@ -114,12 +125,7 @@ function SearchToggle() {
 
 function SignInLink({userSession}: {userSession?: UserSession}) {
   return (
-    <a
-      href={userSession ? '/' : '/sign-in'}
-      onClick={() =>
-        userSession ? localStorage.removeItem('userSession') : null
-      }
-    >
+    <a href={userSession ? '/' : '/sign-in'}>
       {userSession ? `${userSession.user.email} | Logout` : 'Sign In'}
     </a>
   );

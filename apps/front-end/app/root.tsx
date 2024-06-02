@@ -15,6 +15,7 @@ import favicon from './assets/favicon.svg';
 import resetStyles from './styles/reset.css?url';
 import appStyles from './styles/app.css?url';
 import {Layout} from '~/components/Layout';
+import {UserSessionManager} from './lib/session';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -53,7 +54,7 @@ export function links() {
   ];
 }
 
-export async function loader({context}: LoaderFunctionArgs) {
+export async function loader({context, request}: LoaderFunctionArgs) {
   const {storefront, customerAccount, cart} = context;
   const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
 
@@ -76,6 +77,19 @@ export async function loader({context}: LoaderFunctionArgs) {
     },
   });
 
+  const session = await UserSessionManager.getSession(
+    request.headers.get('Cookie'),
+  );
+
+  console.log({hasAccessToken: session.has('access_token')});
+  let userSession = null;
+  if (session.has('access_token')) {
+    userSession = {
+      user: session.data.user,
+      access_token: session.data.access_token,
+    };
+  }
+
   return defer(
     {
       cart: cartPromise,
@@ -83,12 +97,13 @@ export async function loader({context}: LoaderFunctionArgs) {
       header: await headerPromise,
       isLoggedIn: isLoggedInPromise,
       publicStoreDomain,
+      userSession,
     },
-    {
-      headers: {
-        'Set-Cookie': await context.session.commit(),
-      },
-    },
+    // {
+    //   headers: {
+    //     'Set-Cookie': await context.session.commit(),
+    //   },
+    // },
   );
 }
 

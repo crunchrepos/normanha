@@ -4,6 +4,7 @@ import {
   type SessionStorage,
   type Session,
 } from '@shopify/remix-oxygen';
+import {UserSession} from '~/types/user.types';
 
 /**
  * This is a custom session implementation for your Hydrogen shop.
@@ -65,3 +66,20 @@ export class AppSession implements HydrogenSession {
     return this.#sessionStorage.commitSession(this.#session);
   }
 }
+
+type SessionFlashData = {
+  error: string;
+};
+
+export const UserSessionManager = createCookieSessionStorage<
+  UserSession,
+  SessionFlashData
+>({
+  cookie: {
+    name: 'user-session',
+    httpOnly: true,
+    path: '/',
+    sameSite: 'lax',
+    secrets: ['s3cret1'],
+  },
+});

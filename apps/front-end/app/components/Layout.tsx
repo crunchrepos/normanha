@@ -13,6 +13,7 @@ import {
   PredictiveSearchForm,
   PredictiveSearchResults,
 } from '~/components/Search';
+import {UserSession} from '~/types/user.types';
 
 export type LayoutProps = {
   cart: Promise<CartApiQueryFragment | null>;
@@ -20,6 +21,7 @@ export type LayoutProps = {
   footer: Promise<FooterQuery>;
   header: HeaderQuery;
   isLoggedIn: Promise<boolean>;
+  userSession?: UserSession;
 };
 
 export function Layout({
@@ -28,13 +30,21 @@ export function Layout({
   footer,
   header,
   isLoggedIn,
+  userSession,
 }: LayoutProps) {
   return (
     <>
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside menu={header?.menu} shop={header?.shop} />
-      {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
+      {header && (
+        <Header
+          header={header}
+          cart={cart}
+          isLoggedIn={isLoggedIn}
+          userSession={userSession}
+        />
+      )}
       <main>{children}</main>
       <Suspense>
         <Await resolve={footer}>
