@@ -6,9 +6,13 @@ import { AuthService } from '../auth.service';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super();
+    // Override Passport default username field to validate the email field that we use
+    super({
+      usernameField: 'email',
+    });
   }
 
+  // Call the AuthService validation method to verify is user exists and ther data is correct
   async validate(email: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {

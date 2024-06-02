@@ -15,7 +15,10 @@ export class AuthService {
     this.jwtService = jwtService;
   }
 
-  async signUp(email: string, password: string): Promise<any> {
+  async signUp(
+    email: string,
+    password: string,
+  ): Promise<{ user: UserModel; access_token: string }> {
     if (!email || !password) {
       throw new HttpException(
         'Please enter a correct email or password!',
@@ -25,29 +28,27 @@ export class AuthService {
 
     const hashPassword = bcrypt.hashSync(password, 10);
 
-    const createdUser = this.usersService.createUser(email, hashPassword);
+    const createdUser = await this.usersService.createUser(email, hashPassword);
     return {
-      user: createdUser,
+      user: {
+        _id: createdUser._id,
+        email: createdUser.email,
+      },
       access_token: this.jwtService.sign({ email, password: hashPassword }),
     };
   }
 
-  async signIn(email: string, password: string) {
-    const validUser = await this.validateUser(email, password);
-    if (validUser) {
-      return {
-        user: validUser,
-        access_token: this.jwtService.sign({
-          email,
-          password: validUser.password,
-        }),
-      };
-    }
-
-    throw new HttpException(
-      'Please enter a correct email or password!',
-      HttpStatus.BAD_REQUEST,
-    );
+  async signIn(user: UserModel) {
+    return {
+      user: {
+        _id: user._id,
+        email: user.email,
+      },
+      access_token: this.jwtService.sign({
+        email: user.email,
+        password: user.password,
+      }),
+    };
   }
 
   async validateUser(

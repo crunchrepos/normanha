@@ -1,6 +1,15 @@
-import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Request,
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthPayloadDTO } from './database/auth.dto';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,8 +22,12 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  // Local Auth Guard handles the user validation
+  @UseGuards(LocalAuthGuard)
   @Post('sign-in')
-  signIn(@Body() signInDto: AuthPayloadDTO) {
-    return this.authService.signIn(signInDto.email, signInDto.password);
+  signIn(@Request() req) {
+    console.log({ req });
+    const { user } = req;
+    return this.authService.signIn(user);
   }
 }
