@@ -75,7 +75,7 @@ export default function SignIn() {
         <p>
           Don't have an account?
           <a href="sign-up">
-            <b>Sign Up</b>
+            <b> Sign Up</b>
           </a>
         </p>
       </Form>
