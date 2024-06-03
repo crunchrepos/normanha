@@ -81,7 +81,6 @@ export async function loader({context, request}: LoaderFunctionArgs) {
     request.headers.get('Cookie'),
   );
 
-  console.log({hasAccessToken: session.has('access_token')});
   let userSession = null;
   if (session.has('access_token')) {
     userSession = {

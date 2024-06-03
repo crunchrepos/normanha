@@ -101,7 +101,6 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     const productService = new ProductService(axiosInstance);
     const splittedProductId = product.id.split('/');
     const productId = splittedProductId[splittedProductId.length - 1];
-    console.log({productId});
 
     const response = await productService.getFavoriteProduct(
       userSession.user._id,
@@ -306,7 +305,6 @@ function ProductForm({
   variants: Array<ProductVariantFragment>;
   hasFavorited: boolean;
 }) {
-  console.log({hasFavorited});
   const submit = useSubmit();
   return (
     <div className="product-form">

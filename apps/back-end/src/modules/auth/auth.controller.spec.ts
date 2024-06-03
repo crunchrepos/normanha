@@ -22,7 +22,7 @@ describe('AuthController', () => {
         PassportModule,
         JwtModule.register({
           secret: jwtConstants.secret,
-          signOptions: { expiresIn: '600s' },
+          signOptions: { expiresIn: '1h' },
         }),
       ],
       controllers: [AuthController],

@@ -80,7 +80,6 @@ export async function loader({request, context}: LoaderFunctionArgs) {
 
 export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
-  console.log(products);
   return (
     <div className="collection">
       <h1>Favorites</h1>

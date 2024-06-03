@@ -8,7 +8,6 @@ export class ProductService {
     this.axiosInstance = axiosInstance;
   }
   async addToFavorites(userId: string, productId: string) {
-    console.log({userId, productId});
     return this.axiosInstance.post(`${this.URL}/favorites/user/product/add`, {
       userId,
       productId,
