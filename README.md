@@ -1,7 +1,8 @@
 # Crunch FullStack Assignment
 
-## Demo Videos
-https://github.com/lnormanha/crunch-fullstack-assignment/assets/31674320/d23f1a48-fac2-451d-b9c3-be26f128a0e4
+## Demo Video
+
+https://github.com/lnormanha/crunch-fullstack-assignment/assets/31674320/be52fc40-4489-4e33-8589-a07d73f54f90
 
 ## Design choices and Technologies used
 
@@ -11,6 +12,7 @@ To develop the assignment, I chose the following:
 
 #### Front-end
 - **Hydrogen** - Shopify Hydrogen store using TypeScript and leveraging SSR (Server Side Rendering) as it's the main pattern used.
+- **Cookie Session Manager*** - Official Remix cookie based session manager to persist session between routes.
 
 #### Back-end
 - **Nest.js** - Framework using the DDD (Domain Driven Design) approach. Easy to separate responsibilities and use of Dependecy Injection as a default pattern.
@@ -106,6 +108,7 @@ I didn't use the existing screen/route, as the screen depends on some Shopify en
 ```app/routes/sign-up.tsx```
 
 Each contains a Form with validation, and calling a server-side action that calls our authentication routes.
+After the form validations, we generate a new session with the Remix Cookie Manager.
 
 #### Product Detail
 
@@ -124,6 +127,10 @@ I created a new screen called ```app/routes/favorites._index.tsx```
 
 The main flow of this is on our loader method, we call our API to fetch all the user favorite products. With each ID of these products, I created a array of ids and used the array in a GraphQL Query as variables. This enabled to fetch all of our products in a single query.
 After this I populate the products in the screen and we show then to the user.
+
+### Profile
+
+A screen to enable the possibility of the user logout of his account. We can't to that directly in the header because we need a route for server side actions, so I created a quick scaffold to enable this flow, so we can change accounts easily.
 
 #### Header Component
 
