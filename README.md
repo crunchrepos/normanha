@@ -134,4 +134,4 @@ A screen to enable the possibility of the user logout of his account. We can't t
 
 #### Header Component
 
-I added the User email when we login, and I only show the Favorites button with the user logged-in. 
+I added the User email when we login, and I only show the Favorites button with the user logged-in. I also added a new link to redirect to the Profile.
