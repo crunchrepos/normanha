@@ -113,10 +113,11 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
         product,
         variants,
         hasFavorited,
+        hasLoggedIn: true,
       });
     }
   }
-  return defer({product, variants, hasFavorited: false});
+  return defer({product, variants, hasFavorited: false, hasLoggedIn: false});
 }
 export async function action({request}: ActionFunctionArgs) {
   const form = await request.formData();
@@ -184,7 +185,8 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants, hasFavorited} = useLoaderData<typeof loader>();
+  const {product, variants, hasFavorited, hasLoggedIn} =
+    useLoaderData<typeof loader>();
   const {selectedVariant} = product;
   return (
     <div className="product">
@@ -194,6 +196,7 @@ export default function Product() {
         product={product}
         variants={variants}
         hasFavorited={hasFavorited}
+        isLoggedIn={hasLoggedIn}
       />
     </div>
   );
@@ -221,11 +224,13 @@ function ProductMain({
   product,
   variants,
   hasFavorited,
+  isLoggedIn,
 }: {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Promise<ProductVariantsQuery>;
   hasFavorited: boolean;
+  isLoggedIn: boolean;
 }) {
   const {title, descriptionHtml} = product;
   return (
@@ -240,6 +245,7 @@ function ProductMain({
             selectedVariant={selectedVariant}
             variants={[]}
             hasFavorited={hasFavorited}
+            isLoggedIn={isLoggedIn}
           />
         }
       >
@@ -253,6 +259,7 @@ function ProductMain({
               selectedVariant={selectedVariant}
               variants={data.product?.variants.nodes || []}
               hasFavorited={hasFavorited}
+              isLoggedIn={isLoggedIn}
             />
           )}
         </Await>
@@ -299,11 +306,13 @@ function ProductForm({
   selectedVariant,
   variants,
   hasFavorited,
+  isLoggedIn,
 }: {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
   hasFavorited: boolean;
+  isLoggedIn: boolean;
 }) {
   const submit = useSubmit();
   return (
@@ -316,16 +325,18 @@ function ProductForm({
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
-      <FavoritesButton
-        onClick={() =>
-          submit(
-            {productId: product.id, apiCall: hasFavorited ? 'remove' : 'add'},
-            {method: 'post'},
-          )
-        }
-      >
-        {hasFavorited ? 'Remove from favorites' : 'Add to Favorites'}
-      </FavoritesButton>
+      {isLoggedIn && (
+        <FavoritesButton
+          onClick={() =>
+            submit(
+              {productId: product.id, apiCall: hasFavorited ? 'remove' : 'add'},
+              {method: 'post'},
+            )
+          }
+        >
+          {hasFavorited ? 'Remove from favorites' : 'Add to Favorites'}
+        </FavoritesButton>
+      )}
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
