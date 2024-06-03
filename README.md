@@ -128,7 +128,7 @@ I created a new screen called ```app/routes/favorites._index.tsx```
 The main flow of this is on our loader method, we call our API to fetch all the user favorite products. With each ID of these products, I created a array of ids and used the array in a GraphQL Query as variables. This enabled to fetch all of our products in a single query.
 After this I populate the products in the screen and we show then to the user.
 
-### Profile
+#### Profile
 
 A screen to enable the possibility of the user logout of his account. We can't to that directly in the header because we need a route for server side actions, so I created a quick scaffold to enable this flow, so we can change accounts easily.
 
