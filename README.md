@@ -64,7 +64,7 @@ Now, go back to the root folder of the project in your terminal and execute the 
 This will initialize both projects at the same time.
 
 Now you can test both projects in the following routes:
-- **Front-end**: ```http://locahost:3000P```
+- **Front-end**: ```http://locahost:3000```
 - **Back-end**: ```http://locaholst:3123```
 
 ## Project Breakdown and Modifications
