@@ -13,7 +13,7 @@ To develop the assignment, I chose the following:
 - **Hydrogen** - Shopify Hydrogen store using TypeScript and leveraging SSR (Server Side Rendering) as it's the main pattern used.
 
 #### Back-end
-- **Nest.js** - Framework using the DDD (Domain Driven Design) approach. Easy to separate responsabilities and use of Dependecy Injection as a default pattern.
+- **Nest.js** - Framework using the DDD (Domain Driven Design) approach. Easy to separate responsibilities and use of Dependecy Injection as a default pattern.
 - **Rest APi** - Created the API required using REST patterns.
 - **MongoDB and Mongoose** - Great for fast iteration and development, and It's what I have more experience using.
 - **Docker Compose** - For creating our Database container
@@ -69,24 +69,24 @@ Now you can test both projects in the following routes:
 
 ## Project Breakdown and Modifications
 
-In this section I will explain what was created, and some decision made during the development of this assignment.
+In this section I will explain what was created, and some decisions made during the development of this assignment.
 
 ### Back-end
 
 #### Authentication
 This was done first, so we could have favorites for multiple users.
-I choose JWT for simplicity sake, and because it's still a great tool to create User authentication and session management
+I choose JWT for simplicity sake, and because it's still a great tool to create User authentication and session management.
 
 Module: ```src/modules/authentication```
 
 #### Users
-Done in conjunction with the Authentication flow, as we needed to create the Users in our Database.
+Done in conjunction with the Authentication Flow, as we needed to create the Users in our Database.
 It's a simple module just for inserting and validating Users in our Database.
 
 Module: ```src/modules/users```
 
 #### Favorites
-For our main module in this assignment, I choose to make it more "consistent" with what we were dealing with the Shpoify Hydrogen Front-end, so at the end our main
+For the main module in this assignment, I decided to make it more "consistent" with what we were dealing with the Shopify Hydrogen Front-end, so at the end our main
 module is called Products, and our database collection is called favorite-products. I think this makes more sense so we can know we are dealing with products and that's the main responsibility for this module.
 
 Module: ```src/modules/products```
@@ -112,8 +112,8 @@ Each contains a Form with validation, and calling a server-side action that call
 The Screen that we access to Add or Remove a product from the favorites. My main modification there was adding the following:
 
 - A new Favorite Button, that can add or remove a favorite depending if we have that product saved on our database.
-- Added in the main loader method, our API to try and fetch the specific product in our back-end, to check if we have it added in the favorites.
-- Added a new action that is assigned to the Favorite Button to call the API to add or remove the product from the favorites
+- Modified the main loader method, adding our API to try and fetch the specific product in our back-end, to check if we have it added in the favorites.
+- Added a new action that is assigned to the Favorite Button to call the API to add or remove the product from the favorites. The loader is always called after this action, so we always know when we removed or added a product to the favorites.
 
 File: ```app/routes/products.$handle```
 
@@ -122,7 +122,7 @@ File: ```app/routes/products.$handle```
 The main screen of the assignment, responsible to show all the products that we have in our favorites.
 I created a new screen called ```app/routes/favorites._index.tsx```
 
-The main flow of this is on our loader method, we call our API to fetch all the user favorite products. With each ID of these products, I create a array of ids and use it in a GraphQL with the ids as variables. This enabled to fetch all of our products in a single query.
+The main flow of this is on our loader method, we call our API to fetch all the user favorite products. With each ID of these products, I created a array of ids and used the array in a GraphQL Query as variables. This enabled to fetch all of our products in a single query.
 After this I populate the products in the screen and we show then to the user.
 
 #### Header Component
