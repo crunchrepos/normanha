@@ -12,7 +12,7 @@ To develop the assignment, I chose the following:
 
 #### Front-end
 - **Hydrogen** - Shopify Hydrogen store using TypeScript and leveraging SSR (Server Side Rendering) as it's the main pattern used.
-- **Cookie Session Manager*** - Official Remix cookie based session manager to persist session between routes.
+- **Cookie Session Manager** - Official Remix cookie based session manager to persist session between routes.
 
 #### Back-end
 - **Nest.js** - Framework using the DDD (Domain Driven Design) approach. Easy to separate responsibilities and use of Dependecy Injection as a default pattern.
