@@ -40,20 +40,29 @@ To run the project we need the following installed:
 ### First steps
 
 Go the root of the project and execute the following commmand in your terminal:
+
 ```npm install```
+
 This will install all dependencies for the ```back-end``` and ```front-end``` apps in our monorepo.
 
 ### Setting up the Database
 Now, go to the following folder:
+
 ```apps/back-end```
+
 Inside the folder, execute the following command in your terminal:
+
 ```docker-compose up --build -d mongod```
+
 It will initialize our database instance in the background.
 
 ### Executing the project
 Now, go back to the root folder of the project in your terminal and execute the following command:
+
 ```npm run dev```
+
 This will initialize both projects at the same time.
+
 Now you can test both projects in the following routes:
 - **Front-end**: ```http://locahost:3000P```
 - **Back-end**: ```http://locaholst:3123```
