@@ -28,17 +28,22 @@ export class ProductsService {
     return products;
   }
 
-  async deleteFavorite(id: string) {
+  async deleteFavorite(userId: string, productId: string) {
     await this.favoriteProductModel.deleteOne({
-      _id: new Types.ObjectId(id),
+      userId: new Types.ObjectId(userId),
+      productId,
     });
     return {
       message: 'Deleted Favorite Succesfully!',
     };
   }
 
-  async getFavoriteProduct(productId: string) {
-    console.log({ productId });
-    return await this.favoriteProductModel.findOne({ productId });
+  async getFavoriteProduct(userId: string, productId: string) {
+    const product = await this.favoriteProductModel.findOne({
+      userId: new Types.ObjectId(userId),
+      productId,
+    });
+    if (!product) return null;
+    return product;
   }
 }

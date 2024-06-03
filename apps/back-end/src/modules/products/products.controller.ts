@@ -18,7 +18,7 @@ export class ProductsController {
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @Post('favorites/add')
+  @Post('favorites/user/product/add')
   addToFavorites(@Body() favoritesDto: any) {
     return this.productsService.addProductToFavorites(
       favoritesDto.userId,
@@ -28,22 +28,28 @@ export class ProductsController {
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @Get('favorites/user/:id')
+  @Get('favorites/user/:id/products')
   getUserFavorites(@Param() id: string) {
     return this.productsService.getUserFavoriteProducts(id);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @Delete('favorites/:id')
-  deleteUserFavorite(@Param() id: string) {
-    return this.productsService.deleteFavorite(id);
+  @Delete('favorites/user/:userId/product/:productId')
+  deleteUserFavorite(
+    @Param('userId') userId: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.productsService.deleteFavorite(userId, productId);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @Get('favorites/user/product/:id')
-  getFavoriteProduct(@Param('id') id: string) {
-    return this.productsService.getFavoriteProduct(id);
+  @Get('favorites/user/:userId/product/:productId')
+  getFavoriteProduct(
+    @Param('userId') userId: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.productsService.getFavoriteProduct(userId, productId);
   }
 }

@@ -1,11 +1,18 @@
-import {Suspense, useEffect, useState} from 'react';
-import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {Suspense} from 'react';
+import {
+  ActionFunctionArgs,
+  defer,
+  json,
+  redirect,
+  type LoaderFunctionArgs,
+} from '@shopify/remix-oxygen';
 import {
   Await,
   Link,
   useLoaderData,
   type MetaFunction,
   type FetcherWithComponents,
+  useSubmit,
 } from '@remix-run/react';
 import type {
   ProductFragment,
@@ -26,9 +33,8 @@ import type {
 } from '@shopify/hydrogen/storefront-api-types';
 import {getVariantUrl} from '~/lib/variants';
 import {ProductService} from '~/services/product.service';
-import {UserSession} from '~/types/user.types';
-import {FavoriteProduct} from '~/types/products.types';
-import {useUserSession} from '~/hooks/useUserSession';
+import {UserSessionManager} from '~/lib/session';
+import {createRestAPI} from '~/services/api';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -78,7 +84,81 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     variables: {handle},
   });
 
-  return defer({product, variants});
+  // Get the current user session
+  const session = await UserSessionManager.getSession(
+    request.headers.get('Cookie'),
+  );
+
+  // Populate the Cookie datas to a session object
+  const userSession = {
+    access_token: session.get('access_token'),
+    user: session.get('user'),
+  };
+  // Validate if we have the access token and the user ID to make the call to our Rest API
+  if (userSession.access_token && userSession.user?._id) {
+    // Create the API Instance with the authentication token
+    const axiosInstance = createRestAPI(userSession.access_token);
+    const productService = new ProductService(axiosInstance);
+    const splittedProductId = product.id.split('/');
+    const productId = splittedProductId[splittedProductId.length - 1];
+    console.log({productId});
+
+    const response = await productService.getFavoriteProduct(
+      userSession.user._id,
+      productId,
+    );
+
+    if (response.status === 200) {
+      const hasFavorited = response.data._id ? true : false;
+      return defer({
+        product,
+        variants,
+        hasFavorited,
+      });
+    }
+  }
+  return defer({product, variants, hasFavorited: false});
+}
+export async function action({request}: ActionFunctionArgs) {
+  const form = await request.formData();
+  const productId = form.get('productId')?.toString() ?? '';
+  // To verify if the products is favorited or not when receiving the data from the favorite button
+  const apiCall = form.get('apiCall')?.toString() ?? '';
+
+  // Get user session
+  const session = await UserSessionManager.getSession(
+    request.headers.get('Cookie'),
+  );
+
+  // Populate the Cookie datas to a session object
+  const userSession = {
+    access_token: session.get('access_token'),
+    user: session.get('user'),
+  };
+  if (!userSession.access_token) return json({hasFavoritedAction: false});
+
+  const axiosInstance = createRestAPI(userSession.access_token);
+  const productService = new ProductService(axiosInstance);
+
+  // Split the id and get only the numbers to save on the Back-end
+  const splittedProductId = productId.split('/');
+  const productIdSmall = splittedProductId[splittedProductId.length - 1];
+
+  // Check what api call we will be using
+  if (apiCall === 'add') {
+    await productService.addToFavorites(
+      userSession.user?._id as string,
+      productIdSmall,
+    );
+  } else {
+    await productService.deleteProductFromFavorite(
+      userSession.user?._id as string,
+      productIdSmall,
+    );
+  }
+
+  // We don't need to return anything as the loader method will be called after this action ends
+  return null;
 }
 
 function redirectToFirstVariant({
@@ -105,7 +185,7 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants} = useLoaderData<typeof loader>();
+  const {product, variants, hasFavorited} = useLoaderData<typeof loader>();
   const {selectedVariant} = product;
   return (
     <div className="product">
@@ -114,6 +194,7 @@ export default function Product() {
         selectedVariant={selectedVariant}
         product={product}
         variants={variants}
+        hasFavorited={hasFavorited}
       />
     </div>
   );
@@ -140,10 +221,12 @@ function ProductMain({
   selectedVariant,
   product,
   variants,
+  hasFavorited,
 }: {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Promise<ProductVariantsQuery>;
+  hasFavorited: boolean;
 }) {
   const {title, descriptionHtml} = product;
   return (
@@ -157,6 +240,7 @@ function ProductMain({
             product={product}
             selectedVariant={selectedVariant}
             variants={[]}
+            hasFavorited={hasFavorited}
           />
         }
       >
@@ -169,6 +253,7 @@ function ProductMain({
               product={product}
               selectedVariant={selectedVariant}
               variants={data.product?.variants.nodes || []}
+              hasFavorited={hasFavorited}
             />
           )}
         </Await>
@@ -214,43 +299,15 @@ function ProductForm({
   product,
   selectedVariant,
   variants,
+  hasFavorited,
 }: {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
+  hasFavorited: boolean;
 }) {
-  const [favoriteData, setFavoriteData] = useState<FavoriteProduct>();
-
-  const {userSession} = useUserSession();
-
-  async function handleAddToFavorites() {
-    if (!userSession) return null;
-    // Get only the number from the ID
-    const splittedId = product.id.split('/');
-    await ProductService.addToFavorites(
-      userSession.user._id,
-      splittedId[splittedId.length - 1],
-    );
-    await verifyIfHasFavorite();
-  }
-  async function handleRemoveToFavorites() {
-    if (!userSession || !favoriteData) return null;
-    await ProductService.delteProductFromFavorite(favoriteData._id);
-    await verifyIfHasFavorite();
-  }
-
-  async function verifyIfHasFavorite() {
-    const splittedId = product.id.split('/');
-    const id = splittedId[splittedId.length - 1];
-    const response = await ProductService.getFavoriteProduct(id);
-
-    setFavoriteData(response.data);
-  }
-
-  useEffect(() => {
-    verifyIfHasFavorite();
-  }, [product]);
-
+  console.log({hasFavorited});
+  const submit = useSubmit();
   return (
     <div className="product-form">
       <VariantSelector
@@ -261,15 +318,16 @@ function ProductForm({
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <br />
-      {userSession && (
-        <FavoritesButton
-          onClick={
-            favoriteData ? handleRemoveToFavorites : handleAddToFavorites
-          }
-        >
-          {favoriteData ? 'Remove from favorites' : 'Add to Favorites'}
-        </FavoritesButton>
-      )}
+      <FavoritesButton
+        onClick={() =>
+          submit(
+            {productId: product.id, apiCall: hasFavorited ? 'remove' : 'add'},
+            {method: 'post'},
+          )
+        }
+      >
+        {hasFavorited ? 'Remove from favorites' : 'Add to Favorites'}
+      </FavoritesButton>
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {

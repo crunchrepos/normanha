@@ -8,20 +8,25 @@ export class ProductService {
     this.axiosInstance = axiosInstance;
   }
   async addToFavorites(userId: string, productId: string) {
-    return this.axiosInstance.post(`${this.URL}/favorites/add`, {
+    console.log({userId, productId});
+    return this.axiosInstance.post(`${this.URL}/favorites/user/product/add`, {
       userId,
       productId,
     });
   }
   async getAllUserFavorites(userId: string) {
-    return this.axiosInstance.get(`${this.URL}/favorites/user/${userId}`);
-  }
-  async getFavoriteProduct(productId: string) {
     return this.axiosInstance.get(
-      `${this.URL}/favorites/user/product/${productId}`,
+      `${this.URL}/favorites/user/${userId}/products`,
     );
   }
-  async deleteProductFromFavorite(id: string) {
-    return this.axiosInstance.delete(`${this.URL}/favorites/${id}`);
+  async getFavoriteProduct(userId: string, productId: string) {
+    return this.axiosInstance.get(
+      `${this.URL}/favorites/user/${userId}/product/${productId}`,
+    );
+  }
+  async deleteProductFromFavorite(userId: string, productId: string) {
+    return this.axiosInstance.delete(
+      `${this.URL}/favorites/user/${userId}/product/${productId}`,
+    );
   }
 }
