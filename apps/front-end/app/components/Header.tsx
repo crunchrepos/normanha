@@ -1,12 +1,9 @@
-import {Await, NavLink, useLoaderData} from '@remix-run/react';
-import {Suspense, useState} from 'react';
+import {Await, NavLink} from '@remix-run/react';
+import {Suspense} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/lib/root-data';
-import {useUserSession} from '~/hooks/useUserSession';
 import {UserSession} from '~/types/user.types';
-import {LoaderFunctionArgs} from '@remix-run/server-runtime';
-import {UserSessionManager} from '~/lib/session';
 
 type HeaderProps = Pick<
   LayoutProps,
@@ -105,6 +102,7 @@ function HeaderCtas({
       <HeaderMenuMobileToggle />
       <SignInLink userSession={userSession} />
       <FavoritesLink userSession={userSession} />
+      <ProfileLink userSession={userSession} />
       <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
@@ -126,7 +124,7 @@ function SearchToggle() {
 function SignInLink({userSession}: {userSession?: UserSession}) {
   return (
     <a href={userSession ? '/' : '/sign-in'}>
-      {userSession ? `${userSession.user.email} | Logout` : 'Sign In'}
+      {userSession ? `${userSession.user.email}` : 'Sign In'}
     </a>
   );
 }
@@ -134,6 +132,10 @@ function SignInLink({userSession}: {userSession?: UserSession}) {
 function FavoritesLink({userSession}: {userSession?: UserSession}) {
   if (!userSession) return null;
   return <a href="/favorites">Favorites</a>;
+}
+function ProfileLink({userSession}: {userSession?: UserSession}) {
+  if (!userSession) return null;
+  return <a href="/profile">Profile</a>;
 }
 
 function CartBadge({count}: {count: number}) {
