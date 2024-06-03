@@ -1,41 +1,62 @@
-## Crunch FullStack Assignment
+# Crunch FullStack Assignment
 
-### Demo Videos
+## Demo Videos
 https://github.com/lnormanha/crunch-fullstack-assignment/assets/31674320/d23f1a48-fac2-451d-b9c3-be26f128a0e4
 
-### Design choices and technologies used
+## Design choices and Technologies used
 
-For this assignment I chose the following stack:
+To develop the assignment, I chose the following:
 
-- Turborepo - To execute both projects at the same time with less friction.
-- MongoDB -  NoSQL Database that I usually use and have more familiarity.
-- Docker - To make the database container
-- Nest.js - To create the microsservice, mainly because of the patterns we can use, and also because it has a lot of packaged features.
-- Hydrogen with TypeScript - Mainly because it's better to have type safety and also because the back-end is also typed.
-- Rest API - I decided to create the API using Restful, I thought of using GraphQL for parity with Hydrogen, but ended up not using to avoid spending more time than necessary.
+### Technologies:
+
+#### Front-end
+- Hydrogen - Shopify Hydrogen store using TypeScript and leveraging SSR (Server Side Rendering) as it's the main pattern used.
+
+#### Back-end
+- Nest.js - Framework using the DDD (Domain Driven Design) approach. Easy to separate responsibilites and use of Dependecy Injection as a default pattern.
+- Rest APi - Created the API required using REST patterns.
+- MongoDB and Mongoose - Great for fast iteration and development, and It's what I have more experience using.
+- Docker Compose - For creating our Database container
+- Nest Testing and Jest - For creating Unit Tests
+
+#### General
+- Turborepo - To execute both projects at the same time with less friction and with possibility to share some packages.
+
+### Design Patterns
+
+#### Front-end
+For the Front-end, I followed the default pattern used by Hydrogen, leveraging Server Side Rendering for interactivity, and avoinding client-side actions and client-side data storage. I followed their routes structure to avoid deviation from their boilerplate.
+
+#### Back-end
+For the Back-end, I used the Domain Drive Design approach and tried to separate concerns whenever possible. I also separated each context (User, Products, Auth) in modules. I did some iterations and at the end I think the project is well organized and easy to find what you need.
 
 For the Back-end I followed the basic Nest.js structure, creating the necessary modules, controller, and service, and using Dependency Injection when needed. I also used their testing library and passport and jwt library for the Auth flow.
 
-For the Front-end I tried to minimize big changes, so I usually ended up following the routes patterns and component structure. 
-
-### Running the projects 
+## Running the Project 
 
 To run the project we need the following installed:
 - Node.js 18+
-- Docker 
+- Docker Compose (2.27.0-1)
 
-First, we should execute our Database Container, so navigate to `apps/back-end` and run in your terminal:
-```docker-compose up```
+### First steps
 
-Now that the Database is running, open another terminal at the root of the project and run:
+Go the root of the project and execute the following commmand in your terminal:
+```npm install```
+This will install all dependencies for the ```back-end``` and ```front-end``` apps in our monorepo.
+
+### Setting up the Database
+Now, go to the following folder:
+```apps/back-end```
+Inside the folder, execute the following command in your terminal:
+```docker-compose up --build -d mongod```
+It will initialize our database instance in the background.
+
+### Executing the project
+Now, go back to the root folder of the project in your terminal and execute the following command:
 ```npm run dev```
+This will initialize both projects at the same time.
+Now you can test both projects in the following routes:
+- Front-end: ```http://locahost:3000P```
+- Back-end: ```http://locaholst:3123```
 
-It will start both the Front-end and Back-end.
 
-Now you can access the project via the following URL: `http://localhost:3000`
-
-We don't need to configure ENV's, for simplicity sake and a lack of time, I choose to not include any, but I know very well that this is not recommended.
-
-### Closing thoughts
-
-Some things worked out fine and other didn't work as I planned, like the tests. I tried to focus on the core functionality of the assignment first using Authentication. 
